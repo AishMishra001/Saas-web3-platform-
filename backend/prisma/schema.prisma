@@ -16,20 +16,61 @@ datasource db {
 model User {
   id             Int          @id @default(autoincrement())
   address        String       @unique                            // wallet public address 
+  tasks          Task[]
 }
+
+
+model Worker {
+  id             Int          @id @default(autoincrement())
+  address        String       @unique 
+  submissions    Submission[]
+  balance_id     Int 
+  pending_amount Int 
+  locked_amount  Int 
+}
+
 
 model Task {
   id             Int          @id @default(autoincrement())
-  title          String
+  title          String       @default("Select the most clickable one")
+  options        Options[]
+  user_id        Int 
+  signature      String 
+  amount         String 
+  user           User         @relation(fields: [user_id],references: [id])
+  submissions    Submission[]
 }
 
 model Options {
   id             Int          @id @default(autoincrement())
   image_url      String 
-  option_id      Int  
+  option_id      Int
+  task_id        Int
+  task           Task         @relation(fields: [task_id] , references: [id])
+  submissions    Submission[]  
 }
 
-model Worker {
-  id             Int          @id @default(autoincrement())
-  address        String       @unique 
+
+model Submission {
+  id             Int           @id @default(autoincrement())
+  worker_id      Int 
+  worker         Worker         @relation(fields: [worker_id] , references: [id])
+  option_id      Int 
+  option         Options       @relation(fields: [option_id] ,references: [id ])
+  task_id        Int 
+  task           Task          @relation(fields: [task_id]  , references: [id])
+  amount         String 
+}
+
+model SubmissionCache {
+   id            Int          @id @default(autoincrement())
+   task_id       Int 
+   option1       Int 
+   option2       Int 
+   option3       Int 
+   option4       Int 
+   option5       Int 
+   option6       Int 
+   option7       Int 
+   option8       Int 
 }
