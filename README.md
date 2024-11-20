@@ -55,3 +55,9 @@
 
 Object storage is a technology that stores and manages data in an unstructured format called objects. Modern organizations create and analyze large volumes of unstructured data such as photos, videos, email, web pages, sensor data, and audio files. Cloud object storage systems distribute this data across multiple physical devices but allow users to access the content efficiently from a single, virtual storage repository. Object storage solutions are ideal for building cloud native applications that require scale and flexibility, and can also be used to import existing data stores for analytics, backup, or archive. 
 
+
+## Storing and distributing files via AWS 
+
+s3 bucket : It is a aws object store that store files , images ,vd ,etc ...so we will store the file in s3 
+
+cloudfront : We will distribute the file using a CDN ( content delivery network ) called cloudfront 
