@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-[#0B0B0F] text-white overflow-x-hidden">
+    <div className="relative min-h-screen bg-[#0B0B0F] text-white">
       {/* Navigation */}
       <nav className="container mx-auto px-4 py-4 flex items-center justify-between">
         <Link to="/" className="text-2xl font-bold">
@@ -89,7 +89,7 @@ export default function LandingPage() {
       </section>
 
       {/* New Section Below */}
-      <section className="container mx-auto px-4 py-16 relative bg-transparent">
+      <section className="container mx-auto px-4 py-16 relative">
         <div className="grid md:grid-cols-2 gap-x-16 gap-y-20 mb-24">
           {/* Marketplace */}
           <div className="space-y-4">
@@ -169,9 +169,7 @@ export default function LandingPage() {
         {/* Frame 21 and Button */}
         <div className="text-center space-y-6">
           <div className="text-sm text-gray-400">Frame 21</div>
-          <button
-            className="bg-white text-black hover:bg-gray-200 px-6 py-2 rounded-full flex items-center gap-2"
-          >
+          <button className="bg-white text-black hover:bg-gray-200 px-6 py-2 rounded-full flex items-center gap-2 mx-auto">
             Cosmos Hub
             <svg
               className="w-4 h-4"
@@ -191,9 +189,9 @@ export default function LandingPage() {
         </div>
 
         {/* Payment Text */}
-        <div className="absolute bottom-0 left-0 right-0">
+        <div className="w-full overflow-hidden">
           <div
-            className="text-[160px] font-bold text-transparent tracking-wider"
+            className="text-[160px] font-bold text-transparent tracking-wider whitespace-nowrap"
             style={{
               WebkitTextStroke: "1px rgba(255,255,255,0.1)",
               lineHeight: "1",
