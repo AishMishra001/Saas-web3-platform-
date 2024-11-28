@@ -7,13 +7,21 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { JWT_SECRET } from "..";
 import { authMiddleware } from "../middlewares/authMiddleware";
 
+const accessKeyId = process.env.ACCESS_KEY_ID;
+const secretAccessKey = process.env.SECRET_ACCESS_KEY;
+
+if (!accessKeyId || !secretAccessKey) {
+  throw new Error("AWS credentials are not set in environment variables.");
+}
+
 const s3Client = new S3Client({
-  credentials : {
-    accessKeyId : "AKIATQPD64VWLGZBWZMX" , 
-    secretAccessKey : "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"
-  } , 
-  region : "ap-south-1"
-})
+  credentials: {
+    accessKeyId, 
+    secretAccessKey,
+  },
+  region: "ap-south-1",
+});
+
 const router = Router() ; 
 
 const prismaClient = new PrismaClient() ; 
