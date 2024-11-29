@@ -17,6 +17,7 @@ model User {
   id             Int          @id @default(autoincrement())
   address        String       @unique                            // wallet public address 
   tasks          Task[]
+  payouts        Payout[]  
 }
 
 
@@ -24,8 +25,8 @@ model Worker {
   id             Int          @id @default(autoincrement())
   address        String       @unique 
   submissions    Submission[]
-  pending_amount Int 
-  locked_amount  Int 
+  pending_amount Int
+  locked_amount  Int
 }
 
 
@@ -35,7 +36,7 @@ model Task {
   options        Option[]
   user_id        Int 
   signature      String 
-  amount         String 
+  amount         Int 
   done           Boolean      @default(false)
   user           User         @relation(fields: [user_id],references: [id])
   submissions    Submission[]
@@ -59,17 +60,22 @@ model Submission {
   task_id        Int 
   task           Task          @relation(fields: [task_id]  , references: [id])
   amount         String 
+  @@unique([worker_id , task_id])
 }
 
-model SubmissionCache {
-   id            Int          @id @default(autoincrement())
-   task_id       Int 
-   option1       Int 
-   option2       Int 
-   option3       Int 
-   option4       Int 
-   option5       Int 
-   option6       Int 
-   option7       Int 
-   option8       Int 
+model Payout {
+  id           Int              @id @default(autoincrement()) 
+  user_id      Int 
+  user         User             @relation(fields: [user_id],references: [id])
+  amount       Int 
+  signature    String 
+  status       TxnStatus 
 }
+
+enum TxnStatus {
+  Processing 
+  Success 
+  Failure
+}
+
+

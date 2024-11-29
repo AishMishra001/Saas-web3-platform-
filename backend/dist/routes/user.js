@@ -20,6 +20,7 @@ const __1 = require("..");
 const authMiddleware_1 = require("../middlewares/authMiddleware");
 const s3_presigned_post_1 = require("@aws-sdk/s3-presigned-post");
 const types_1 = require("../types");
+const config_1 = require("./config");
 const DEFAULT_TITLE = "Select the most clickable one";
 const accessKeyId = process.env.ACCESS_KEY_ID;
 const secretAccessKey = process.env.SECRET_ACCESS_KEY;
@@ -96,7 +97,7 @@ router.post("/task", authMiddleware_1.authMiddleware, ((req, res) => __awaiter(v
         const response = yield tx.task.create({
             data: {
                 title: (_a = parseData.data.title) !== null && _a !== void 0 ? _a : DEFAULT_TITLE,
-                amount: "1",
+                amount: 1 * config_1.TOTAL_DECIMALS,
                 //TODO: Signature should be unique in the table else people can reuse a signature
                 signature: parseData.data.signature,
                 user_id: userId

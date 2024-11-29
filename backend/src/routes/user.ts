@@ -105,7 +105,7 @@ router.post("/task" , authMiddleware ,(async (req,res)=>{
     const response = await tx.task.create({
         data: {
             title: parseData.data.title ?? DEFAULT_TITLE,
-            amount: "1" ,
+            amount: 1 * TOTAL_DECIMALS  ,
             //TODO: Signature should be unique in the table else people can reuse a signature
             signature: parseData.data.signature,
             user_id: userId
