@@ -16,32 +16,41 @@ const client_1 = require("@prisma/client");
 const express_1 = require("express");
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const client_s3_1 = require("@aws-sdk/client-s3");
-const s3_request_presigner_1 = require("@aws-sdk/s3-request-presigner");
 const __1 = require("..");
 const authMiddleware_1 = require("../middlewares/authMiddleware");
+const s3_presigned_post_1 = require("@aws-sdk/s3-presigned-post");
+const accessKeyId = process.env.ACCESS_KEY_ID;
+const secretAccessKey = process.env.SECRET_ACCESS_KEY;
+if (!accessKeyId || !secretAccessKey) {
+    throw new Error("AWS credentials are not set in environment variables.");
+}
 const s3Client = new client_s3_1.S3Client({
     credentials: {
-        accessKeyId: "AKIATQPD64VWLGZBWZMX",
-        secretAccessKey: "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"
+        accessKeyId,
+        secretAccessKey,
     },
-    region: "ap-south-1"
+    region: "ap-south-1",
 });
 const router = (0, express_1.Router)();
 const prismaClient = new client_1.PrismaClient();
 router.get("/presignedUrl", authMiddleware_1.authMiddleware, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     //  @ts-ignore 
     const userId = req.userId;
-    const command = new client_s3_1.PutObjectCommand({
-        Bucket: "labelchain",
+    const { url, fields } = yield (0, s3_presigned_post_1.createPresignedPost)(s3Client, {
+        Bucket: 'labelchain',
         Key: `${userId}/${Math.random()}/image.jpg`,
-        ContentType: "img/jpg"
+        Conditions: [
+            ['content-length-range', 0, 5 * 1024 * 1024] // 5 MB max
+        ],
+        Fields: {
+            success_action_status: '201',
+            'Content-Type': 'image/png'
+        },
+        Expires: 3600
     });
-    const preSignedUrl = yield (0, s3_request_presigner_1.getSignedUrl)(s3Client, command, {
-        expiresIn: 3600
-    });
-    console.log(preSignedUrl);
+    console.log({ url, fields });
     res.json({
-        preSignedUrl
+        preSignedUrl: url
     });
 }));
 router.post("/signin", (req, res) => __awaiter(void 0, void 0, void 0, function* () {

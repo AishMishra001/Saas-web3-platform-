@@ -6,6 +6,7 @@ import { S3Client, GetObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { JWT_SECRET } from "..";
 import { authMiddleware } from "../middlewares/authMiddleware";
+import { createPresignedPost } from '@aws-sdk/s3-presigned-post'
 
 const accessKeyId = process.env.ACCESS_KEY_ID;
 const secretAccessKey = process.env.SECRET_ACCESS_KEY;
@@ -26,24 +27,35 @@ const router = Router() ;
 
 const prismaClient = new PrismaClient() ; 
 
+
+router.post("/task" , authMiddleware , async(req,res)=>{
+  
+})
+
 router.get("/presignedUrl", authMiddleware ,  async(req,res)=>{
   //  @ts-ignore 
   const userId = req.userId ; 
-const command = new PutObjectCommand({
-  Bucket: "labelchain",
+
+const { url, fields } = await createPresignedPost(s3Client, {
+  Bucket: 'labelchain',
   Key: `${userId}/${Math.random()}/image.jpg`,
-  ContentType : "img/jpg"
+  Conditions: [
+    ['content-length-range', 0, 5 * 1024 * 1024] // 5 MB max
+  ],
+  Fields: {
+    success_action_status: '201',
+    'Content-Type': 'image/png'
+  },
+  Expires: 3600
 })
 
-const preSignedUrl = await getSignedUrl(s3Client, command, {
-  expiresIn: 3600
-})
+console.log({url , fields })
 
-console.log(preSignedUrl) ; 
 
 
 res.json({
-  preSignedUrl 
+  preSignedUrl : url , 
+  fields 
 })
 
 })

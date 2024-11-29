@@ -5,9 +5,10 @@ const app = express() ;
 export const JWT_SECRET = "Madhav" ; 
 // postgres + prisma ( url in aws.txt locally ) 
 
+app.use(express.json()) ; 
 
 app.use("/v1/user", userRouter) ; 
-app.use("/v1/worker",workerRouter) ; 
+app.use("/v1/worker",workerRouter) ;  
 
 
 app.listen(3000) ; 
