@@ -35,6 +35,50 @@ const s3Client = new client_s3_1.S3Client({
 });
 const router = (0, express_1.Router)();
 const prismaClient = new client_1.PrismaClient();
+router.get("/task", authMiddleware_1.authMiddleware, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    // @ts-ignore 
+    const taskId = req.query.taskId;
+    // @ts-ignore 
+    const userId = req.userId;
+    const taskDetails = yield prismaClient.task.findFirst({
+        where: {
+            user_id: Number(userId),
+            id: Number(taskId),
+        },
+        include: {
+            options: true
+        }
+    });
+    if (!taskDetails) {
+        res.status(411).json({
+            message: "You don't have access to this task",
+        });
+        return;
+    }
+    // Fetching responses
+    const responses = yield prismaClient.submission.findMany({
+        where: {
+            task_id: Number(taskId),
+        },
+        include: {
+            option: true,
+        },
+    });
+    const result = {};
+    taskDetails.options.forEach(option => {
+        result[option.id] = {
+            count: 1,
+            option: {
+                imageUrl: option.image_url
+            },
+        };
+    });
+    responses.forEach((r) => {
+        result[r.option_id].count++;
+    });
+    // Responding with the result
+    res.json({ result });
+}));
 // @ts-ignore 
 router.post("/task", authMiddleware_1.authMiddleware, ((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     // @ts-ignore 

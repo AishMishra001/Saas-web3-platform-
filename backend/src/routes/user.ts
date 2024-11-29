@@ -9,6 +9,8 @@ import { authMiddleware } from "../middlewares/authMiddleware";
 import { createPresignedPost } from '@aws-sdk/s3-presigned-post'
 import { createTaskInput } from "../types";
 import { TOTAL_DECIMALS } from "./config";
+import { Request, Response } from 'express'; 
+import { optional } from "zod";
 const DEFAULT_TITLE = "Select the most clickable one" ; 
 
 const accessKeyId = process.env.ACCESS_KEY_ID;
@@ -29,6 +31,58 @@ const s3Client = new S3Client({
 const router = Router() ; 
 
 const prismaClient = new PrismaClient() ; 
+
+
+router.get("/task", authMiddleware, async (req: Request, res: Response): Promise<void> => {
+  // @ts-ignore 
+  const taskId: string = req.query.taskId; 
+  // @ts-ignore 
+  const userId: string = req.userId;
+
+  const taskDetails = await prismaClient.task.findFirst({
+    where: {
+      user_id: Number(userId),
+      id: Number(taskId),
+    }, 
+    include : {
+      options : true 
+    }
+  });
+
+  if (!taskDetails) {
+    res.status(411).json({
+      message: "You don't have access to this task",
+    });
+    return; 
+  }
+  // Fetching responses
+  const responses = await prismaClient.submission.findMany({
+    where: {
+      task_id: Number(taskId),
+    },
+    include: {
+      option: true,
+    },
+  });
+
+  const result: Record<string, { count: number, option : { imageUrl: string } }> = {};
+
+  taskDetails.options.forEach( option =>{
+    result[option.id] = {
+      count: 0,
+      option : {
+        imageUrl: option.image_url 
+      },
+    };
+  })
+
+  responses.forEach((r) => {
+      result[r.option_id].count++;
+  });
+
+  // Responding with the result
+  res.json({ result });
+});
 
 // @ts-ignore 
 router.post("/task" , authMiddleware ,(async (req,res)=>{  
