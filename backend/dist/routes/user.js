@@ -67,7 +67,7 @@ router.get("/task", authMiddleware_1.authMiddleware, (req, res) => __awaiter(voi
     const result = {};
     taskDetails.options.forEach(option => {
         result[option.id] = {
-            count: 1,
+            count: 0,
             option: {
                 imageUrl: option.image_url
             },

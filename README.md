@@ -61,3 +61,7 @@ Object storage is a technology that stores and manages data in an unstructured f
 s3 bucket : It is a aws object store that store files , images ,vd ,etc ...so we will store the file in s3 
 
 cloudfront : We will distribute the file using a CDN ( content delivery network ) called cloudfront 
+
+
+
+worker auth token : "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTczMjg4MDk5Mn0.hrubYyiNCOu3077_2IpsXvOkGAQs4KnnN3oNm91Vn_0"

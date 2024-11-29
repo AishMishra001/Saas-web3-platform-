@@ -3,6 +3,7 @@ const userRouter = require("./routes/user") ;
 const workerRouter = require("./routes/worker") ;  
 const app = express() ; 
 export const JWT_SECRET = "Madhav" ; 
+export const WORKER_JWT_SECRET = JWT_SECRET + "worker" ; 
 // postgres + prisma ( url in aws.txt locally ) 
 
 app.use(express.json()) ; 
