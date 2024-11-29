@@ -7,6 +7,9 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { JWT_SECRET } from "..";
 import { authMiddleware } from "../middlewares/authMiddleware";
 import { createPresignedPost } from '@aws-sdk/s3-presigned-post'
+import { createTaskInput } from "../types";
+import { TOTAL_DECIMALS } from "./config";
+const DEFAULT_TITLE = "Select the most clickable one" ; 
 
 const accessKeyId = process.env.ACCESS_KEY_ID;
 const secretAccessKey = process.env.SECRET_ACCESS_KEY;
@@ -27,10 +30,51 @@ const router = Router() ;
 
 const prismaClient = new PrismaClient() ; 
 
+// @ts-ignore 
+router.post("/task" , authMiddleware ,(async (req,res)=>{  
+  // @ts-ignore 
+  const userId = req.userId  ; 
+  const body = req.body ; 
 
-router.post("/task" , authMiddleware , async(req,res)=>{
-  
+  const parseData = createTaskInput.safeParse(body) ; 
+
+  if(!parseData.success){
+    return res.status(411).json({
+      message : "You are sending the wrong inputs "
+    })
+  }
+
+  // parse the signature here to ensure the person is paid 
+
+  let response = await prismaClient.$transaction(async tx => {
+
+    const response = await tx.task.create({
+        data: {
+            title: parseData.data.title ?? DEFAULT_TITLE,
+            amount: "1" ,
+            //TODO: Signature should be unique in the table else people can reuse a signature
+            signature: parseData.data.signature,
+            user_id: userId
+        }
+    });
+
+    await tx.option.createMany({
+        data: parseData.data.options.map(x => ({
+            image_url: x.imageUrl,
+            task_id: response.id
+        }))
+    })
+
+    return response ; 
+
 })
+
+   res.json({
+     id : response.id 
+   })
+}) )
+
+
 
 router.get("/presignedUrl", authMiddleware ,  async(req,res)=>{
   //  @ts-ignore 
@@ -62,7 +106,8 @@ res.json({
 
 router.post("/signin" , async (req,res)=>{
   try{
-    const hardcodedWalletAddress = "3hbguPSt9QwiB9gnYzGDbjL4q4Hsr4xGyHQj8Cqmzx9E" ; 
+    const hardcodedWalletAddress = "3hbguPSt9QwiB9gnYzGDbjL4q4Hsr4xGyHQj8Cqmzx9E" 
+    ; 
 
     const existingUser = await prismaClient.user.findFirst({
       where : {

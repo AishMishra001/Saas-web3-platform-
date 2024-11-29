@@ -19,6 +19,8 @@ const client_s3_1 = require("@aws-sdk/client-s3");
 const __1 = require("..");
 const authMiddleware_1 = require("../middlewares/authMiddleware");
 const s3_presigned_post_1 = require("@aws-sdk/s3-presigned-post");
+const types_1 = require("../types");
+const DEFAULT_TITLE = "Select the most clickable one";
 const accessKeyId = process.env.ACCESS_KEY_ID;
 const secretAccessKey = process.env.SECRET_ACCESS_KEY;
 if (!accessKeyId || !secretAccessKey) {
@@ -33,6 +35,41 @@ const s3Client = new client_s3_1.S3Client({
 });
 const router = (0, express_1.Router)();
 const prismaClient = new client_1.PrismaClient();
+// @ts-ignore 
+router.post("/task", authMiddleware_1.authMiddleware, ((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    // @ts-ignore 
+    const userId = req.userId;
+    const body = req.body;
+    const parseData = types_1.createTaskInput.safeParse(body);
+    if (!parseData.success) {
+        return res.status(411).json({
+            message: "You are sending the wrong inputs "
+        });
+    }
+    // parse the signature here to ensure the person is paid 
+    let response = yield prismaClient.$transaction((tx) => __awaiter(void 0, void 0, void 0, function* () {
+        var _a;
+        const response = yield tx.task.create({
+            data: {
+                title: (_a = parseData.data.title) !== null && _a !== void 0 ? _a : DEFAULT_TITLE,
+                amount: "1",
+                //TODO: Signature should be unique in the table else people can reuse a signature
+                signature: parseData.data.signature,
+                user_id: userId
+            }
+        });
+        yield tx.option.createMany({
+            data: parseData.data.options.map(x => ({
+                image_url: x.imageUrl,
+                task_id: response.id
+            }))
+        });
+        return response;
+    }));
+    res.json({
+        id: response.id
+    });
+})));
 router.get("/presignedUrl", authMiddleware_1.authMiddleware, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     //  @ts-ignore 
     const userId = req.userId;
@@ -50,7 +87,8 @@ router.get("/presignedUrl", authMiddleware_1.authMiddleware, (req, res) => __awa
     });
     console.log({ url, fields });
     res.json({
-        preSignedUrl: url
+        preSignedUrl: url,
+        fields
     });
 }));
 router.post("/signin", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
